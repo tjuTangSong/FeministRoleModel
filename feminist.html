@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测测你的Role Model</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background-color: #FFF5E6;
+            color: #4A4A4A;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #FFDAB9;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        h1 {
+            color: #FF6347;
+            margin-bottom: 2rem;
+        }
+        .input-group {
+            margin-bottom: 1rem;
+        }
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #8B4513;
+        }
+        input {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #DEB887;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        button {
+            background-color: #FF6347;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #FF4500;
+        }
+        .result {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+        }
+        .avatar {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-bottom: 1rem;
+        }
+    </style>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('submitBtn').addEventListener('click', function() {
+                const birthday = document.getElementById('birthday').value;
+                const book = document.getElementById('book').value;
+
+                fetch('http://127.0.0.1:9999/match_role_model', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ birthday, book }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log('接口返回的数据:', data);
+                    const resultDiv = document.createElement('div');
+                    resultDiv.className = 'result';
+                    
+                    if (data.avatar) {
+                        const img = document.createElement('img');
+                        img.src = `http://127.0.0.1:9999${data.avatar}`; // 注意这里的URL构建
+                        img.className = 'avatar';
+                        resultDiv.appendChild(img);
+                    }
+                    
+                    const nameElement = document.createElement('h2');
+                    nameElement.textContent = data.name;
+                    resultDiv.appendChild(nameElement);
+                    
+                    const mottoElement = document.createElement('p');
+                    mottoElement.textContent = data.motto;
+                    resultDiv.appendChild(mottoElement);
+                    
+                    document.querySelector('.container').appendChild(resultDiv);
+                })
+                .catch(error => {
+                    console.error('错误:', error);
+                    const errorDiv = document.createElement('div');
+                    errorDiv.textContent = `发生错误：${error.message}`;
+                    errorDiv.className = 'error';
+                    document.querySelector('.container').appendChild(errorDiv);
+                });
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>测测你的Role Model</h1>
+        <div class="input-group">
+            <label for="birthday">请输入你的生日：</label>
+            <input type="date" id="birthday" name="birthday" required>
+        </div>
+        <div class="input-group">
+            <label for="book">请输入你喜欢的书名：</label>
+            <input type="text" id="book" name="book" required>
+        </div>
+        <button id="submitBtn">提交</button>
+
+    </div>
+</body>
+</html>     
