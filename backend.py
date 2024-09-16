@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import datetime
 import os
+from read_data import read_feminist_data, find_matching_feminist
 
 app = Flask(__name__)
 CORS(app)  # 在这里应用 CORS，确保在任何路由之前
@@ -16,30 +17,23 @@ def process_input():
     book = data.get('book')
 
     try:
-        birthday_date = datetime.datetime.strptime(birthday, '%Y-%m-%d')
-        age = (datetime.datetime.now() - birthday_date).days // 365
+        feminist_data = read_feminist_data()
+        matching_feminist = find_matching_feminist(birthday, feminist_data)
         
-        if age < 30 and "科技" in book:
-            name = "谢尔盖·布林"
-            motto = "不作恶。"
-            avatar_file = "Beauvoir_avator.jpeg"
-        elif age >= 30 and "文学" in book:
-            name = "西蒙娜·德·波伏瓦"
-            motto = "人不是生而为女人的，而是成为女人的。"
-            avatar_file = "Beauvoir_avator.jpeg"
+        if matching_feminist:
+            response = {
+                "name": matching_feminist["名字"],
+                "motto": matching_feminist["金句"],
+                "representative_work": matching_feminist["代表作"],
+                "mbti": matching_feminist["MBTI"],
+                "introduction": matching_feminist["人物介绍小传"],
+                "avatar": f"/avatars/Beauvoir_avator.jpeg"  # 假设头像文件名与名字相同
+            }
         else:
-            name = "玛丽·居里"
-            motto = "在生活中，没有什么可怕的，只有应该了解的。"
-            avatar_file = "Beauvoir_avator.jpeg"
-        
-        # 构建图片的URL
-        avatar_url = f"/avatars/{avatar_file}"
-        
-        response = {
-            "name": name,
-            "motto": motto,
-            "avatar": avatar_url
-        }
+            response = {
+                "message": "未找到匹配的角色模型。",
+                "status": "error"
+            }
     except ValueError:
         response = {
             "message": "生日格式不正确，请使用 YYYY-MM-DD 格式。",
@@ -55,4 +49,3 @@ def serve_avatar(filename):
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=9999, debug=True)
-

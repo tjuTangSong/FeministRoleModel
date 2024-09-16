@@ -4,130 +4,116 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>测测你的Role Model</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <style>
+        [x-cloak] { display: none !important; }
         body {
-            font-family: 'Microsoft YaHei', sans-serif;
-            background-color: #FFF5E6;
-            color: #4A4A4A;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
+            position: relative;
+            overflow: hidden;
         }
-        .container {
-            background-color: #FFDAB9;
-            padding: 2rem;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            text-align: center;
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: -1;
+            background-image: url('/Users/tangsong/Documents/FeminismWeb/resources/feminism1.jpeg');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.5;
+            animation: changeBackground 15s infinite;
         }
-        h1 {
-            color: #FF6347;
-            margin-bottom: 2rem;
+        @keyframes changeBackground {
+            0%, 33% { background-image: url('/Users/tangsong/Documents/FeminismWeb/resources/feminism1.jpeg'); }
+            33%, 66% { background-image: url('/Users/tangsong/Documents/FeminismWeb/resources/feminism2.jpeg'); }
+            66%, 99% { background-image: url('/Users/tangsong/Documents/FeminismWeb/resources/feminism3.jpeg'); }
+            99%, 100% { background-image: url('/Users/tangsong/Documents/FeminismWeb/resources/feminism1.jpeg'); }
         }
-        .input-group {
-            margin-bottom: 1rem;
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
         }
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            color: #8B4513;
-        }
-        input {
-            width: 100%;
-            padding: 0.5rem;
-            border: 1px solid #DEB887;
-            border-radius: 4px;
-            font-size: 1rem;
-        }
-        button {
-            background-color: #FF6347;
-            color: white;
-            border: none;
-            padding: 0.5rem 1rem;
-            font-size: 1rem;
-            border-radius: 4px;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #FF4500;
-        }
-        .result {
-            margin-top: 1rem;
-            padding: 1rem;
-            background-color: #f0f0f0;
-            border-radius: 4px;
-        }
-        .avatar {
-            width: 100px;
-            height: 100px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin-bottom: 1rem;
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
     </style>
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('submitBtn').addEventListener('click', function() {
-                const birthday = document.getElementById('birthday').value;
-                const book = document.getElementById('book').value;
-
-                fetch('http://127.0.0.1:9999/match_role_model', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ birthday, book }),
-                })
-                .then(response => response.json())
-                .then(data => {
-                    console.log('接口返回的数据:', data);
-                    const resultDiv = document.createElement('div');
-                    resultDiv.className = 'result';
-                    
-                    if (data.avatar) {
-                        const img = document.createElement('img');
-                        img.src = `http://127.0.0.1:9999${data.avatar}`; // 注意这里的URL构建
-                        img.className = 'avatar';
-                        resultDiv.appendChild(img);
-                    }
-                    
-                    const nameElement = document.createElement('h2');
-                    nameElement.textContent = data.name;
-                    resultDiv.appendChild(nameElement);
-                    
-                    const mottoElement = document.createElement('p');
-                    mottoElement.textContent = data.motto;
-                    resultDiv.appendChild(mottoElement);
-                    
-                    document.querySelector('.container').appendChild(resultDiv);
-                })
-                .catch(error => {
-                    console.error('错误:', error);
-                    const errorDiv = document.createElement('div');
-                    errorDiv.textContent = `发生错误：${error.message}`;
-                    errorDiv.className = 'error';
-                    document.querySelector('.container').appendChild(errorDiv);
-                });
-            });
-        });
-    </script>
 </head>
-<body>
-    <div class="container">
-        <h1>测测你的Role Model</h1>
-        <div class="input-group">
-            <label for="birthday">请输入你的生日：</label>
-            <input type="date" id="birthday" name="birthday" required>
+<body class="bg-pink-50 text-gray-800 flex justify-center items-center min-h-screen p-4">
+    <div x-data="roleModel()" class="max-w-md w-full">
+        <div x-show="!result" class="bg-white bg-opacity-75 rounded-xl shadow-md overflow-hidden p-8 relative z-10">
+            <h1 class="text-3xl font-bold text-pink-600 mb-6 text-center">测测你的Role Model</h1>
+            <form @submit.prevent="submitForm" class="space-y-4">
+                <div>
+                    <label for="birthday" class="block text-sm font-medium text-gray-700 mb-1">请输入你的生日：</label>
+                    <input type="date" id="birthday" x-model="birthday" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-pink-500 bg-white bg-opacity-75">
+                </div>
+                <button type="submit" class="w-full bg-pink-600 text-white py-2 px-4 rounded-md hover:bg-pink-700 transition duration-300">提交</button>
+            </form>
         </div>
-        <div class="input-group">
-            <label for="book">请输入你喜欢的书名：</label>
-            <input type="text" id="book" name="book" required>
+        <div x-show="result" x-cloak class="bg-white bg-opacity-75 rounded-xl shadow-md overflow-hidden p-8 relative z-10 fade-in">
+            <h2 class="text-2xl font-bold text-pink-600 mb-4 text-center">来自过去的她想对你说</h2>
+            <div class="flex items-center justify-center mb-4">
+                <img :src="result.avatar" :alt="result.name" class="w-16 h-16 rounded-full mr-4 object-cover">
+                <span x-text="result.name" class="text-xl font-semibold"></span>
+            </div>
+            <p class="text-center text-gray-700 mb-4">
+                <span class="font-semibold">她说：</span>
+                <span x-text="result.motto" class="italic"></span>
+            </p>
+            <div class="bg-pink-100 p-4 rounded-md">
+                <h3 class="font-semibold mb-2">她是谁？</h3>
+                <p x-text="result.introduction" class="text-sm text-gray-600"></p>
+                <p class="mt-2 text-sm">
+                    <span class="font-semibold">代表作：</span>
+                    <span x-text="result.representative_work"></span>
+                </p>
+                <p class="mt-1 text-sm">
+                    <span class="font-semibold">MBTI：</span>
+                    <span x-text="result.mbti"></span>
+                </p>
+            </div>
         </div>
-        <button id="submitBtn">提交</button>
-
+        <div x-show="error" x-text="error" x-cloak class="mt-4 text-red-600 text-center"></div>
     </div>
+
+    <script>
+        function roleModel() {
+            return {
+                birthday: '',
+                result: null,
+                error: null,
+                submitForm() {
+                    fetch('http://127.0.0.1:9999/match_role_model', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ birthday: this.birthday }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'error') {
+                            this.error = data.message;
+                            this.result = null;
+                        } else {
+                            this.result = {
+                                ...data,
+                                avatar: `http://127.0.0.1:9999${data.avatar}`
+                            };
+                            this.error = null;
+                        }
+                    })
+                    .catch(error => {
+                        console.error('错误:', error);
+                        this.error = `发生错误：${error.message}`;
+                        this.result = null;
+                    });
+                }
+            }
+        }
+    </script>
 </body>
-</html>     
+</html>
